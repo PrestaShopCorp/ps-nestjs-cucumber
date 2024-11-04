@@ -1,7 +1,6 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { BasketItemEntity } from '../entities/basket-item.entity';
-import { ulid } from 'ulid';
-import { AttributesOnly, RemoveReadonly } from '@shared/types/attributes-only';
+import { AttributesOnly } from '@shared/types/attributes-only';
 import { BasketDto } from '@contexts/shopping-basket/drivers/rest/basket.dto';
 
 export class BasketAggregate {
@@ -9,26 +8,27 @@ export class BasketAggregate {
   items!: BasketItemEntity[];
   freeShipping: any;
 
-  private constructor(value: RemoveReadonly<AttributesOnly<BasketAggregate>>) {
+  private constructor(value: AttributesOnly<BasketAggregate>) {
     this.id = value.id;
     this.items = value.items;
     this.freeShipping = value.freeShipping;
   }
 
-  static create(basket: { id: string }): BasketAggregate {
+  static create(
+    basket: Partial<AttributesOnly<BasketAggregate>>,
+  ): BasketAggregate {
     Logger.log('Create basket');
 
     const basketAggregate = new BasketAggregate({
       id: basket.id,
-      items: [],
-      freeShipping: false,
+      items: basket.items ?? [],
+      freeShipping: basket.freeShipping ?? false,
     });
 
     Logger.log('Basket created');
 
     return basketAggregate;
   }
-
 
   addOneItem(item: BasketItemEntity): void {
     Logger.log('Add basket item', { item });

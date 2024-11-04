@@ -32,10 +32,7 @@ export const migrateToLatest = async (schema: string): Promise<void> => {
       fs,
       path,
       // This needs to be an absolute path.
-      migrationFolder: path.join(
-        __dirname,
-        '../../../database/postgres/migrations',
-      ),
+      migrationFolder: path.join(__dirname, '../../../database/migrations'),
     }),
   });
 
@@ -62,7 +59,7 @@ export const migrateToLatest = async (schema: string): Promise<void> => {
 };
 
 export const deleteSchema = async (schema: string): Promise<void> => {
-  const database = new Kysely<Database>({
+  const database = new Kysely<any>({
     dialect: new PostgresDialect({
       pool: new Pool({
         database: process.env.DB_DATABASE,

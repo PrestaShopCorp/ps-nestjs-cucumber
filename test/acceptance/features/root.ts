@@ -23,5 +23,5 @@ BeforeAll(async function (): Promise<void> {
 
 AfterAll({ timeout: 5000 }, async function (): Promise<void> {
   await ServerTestHelper.stop(server);
-  await deleteSchema(process.env.DB_SCHEMA!);
+  // await deleteSchema(process.env.DB_SCHEMA!);
 });

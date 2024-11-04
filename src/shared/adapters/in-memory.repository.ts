@@ -22,10 +22,9 @@ export class InMemoryRepository<T extends { readonly id: string }>
     return this.databases.get(this.databaseName) as Map<string, T>;
   }
 
-  async save(item: T): Promise<T> {
+  async save(item: T): Promise<void> {
     const db = this.getDatabase();
     db.set(item.id, item);
-    return item;
   }
 
   async getById(id: string): Promise<T | undefined> {

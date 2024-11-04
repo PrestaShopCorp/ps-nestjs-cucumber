@@ -9,7 +9,7 @@ Feature: Compute free shipping cost
 
   Scenario: Free shipping when basket price equal 60€ without new product
     Given the basket '01JBVRX1MEJHHQ9GJFMK5P4CFR' is created
-    And the item 'trousers_96834DU' is added to the basket '01JBVS5G2V5JPKHZ23EV0V6M6A'
+    And the item 'trousers_96834DU' is added to the basket '01JBVRX1MEJHHQ9GJFMK5P4CFR'
     When the shipping fees are calculated for basket '01JBVRX1MEJHHQ9GJFMK5P4CFR'
     Then the shipping are free for the basket '01JBVRX1MEJHHQ9GJFMK5P4CFR'
 

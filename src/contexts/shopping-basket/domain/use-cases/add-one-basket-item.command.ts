@@ -1,5 +1,8 @@
 import { BasketAggregate } from '../aggregates/basket.aggregate';
-import { BasketItemEntity } from '../entities/basket-item.entity';
+import {
+  BasketItemEntity,
+  getPriceFromId,
+} from '../entities/basket-item.entity';
 import { BasketRepository } from '../ports/basket.repository';
 
 export interface AddOneBasketItemCommand {
@@ -15,8 +18,9 @@ export const addOneBasketItem = async (
   const { basketId, itemId } = command;
 
   const basket = await basketRepository.getById(basketId);
-  // TODO replace by repository call to retrieve the price
-  const item = new BasketItemEntity(itemId, 3499, 1);
+  // TODO improve this by retrieving the price from a product context, a PIM for example
+  const itemPrice = getPriceFromId(itemId);
+  const item = new BasketItemEntity(itemId, itemPrice, 1);
 
   basket.addOneItem(item);
 

@@ -29,20 +29,6 @@ export class BasketAggregate {
     return basketAggregate;
   }
 
-  removeOneItemForAllQuantity(itemId: string): void {
-    Logger.log('Remove basket item', { itemId });
-
-    // TODO improve this with arrayUtils
-    const index = this.findItemIndex(itemId);
-    if (index === -1) {
-      throw new NotFoundException(
-        `Item ${itemId} not found in basket ${this.id}`,
-      );
-    }
-
-    this.items.splice(index, 1);
-    Logger.log('Basket item removed', { itemId });
-  }
 
   addOneItem(item: BasketItemEntity): void {
     Logger.log('Add basket item', { item });

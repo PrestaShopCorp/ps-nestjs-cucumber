@@ -1,23 +1,19 @@
 import * as request from 'supertest';
 import { server } from '../../root';
 
-export const createBasket = async (basketId: string): Promise<any> => {
+export const computeShippingCost = async (basketId: string): Promise<any> => {
   const queryResponse = await request(server.application.getHttpServer())
-    .post(`/basket`)
-    .send({ id: basketId })
+    .post(`/basket/${basketId}/shipping-cost`)
+    .send({})
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json');
 
   return queryResponse;
 };
 
-export const addItemToBasket = async (
-  basketId: string,
-  item: { id: string },
-): Promise<any> => {
+export const getShippingCost = async (basketId: string): Promise<any> => {
   const queryResponse = await request(server.application.getHttpServer())
-    .post(`/basket/${basketId}/item`)
-    .send(item)
+    .get(`/basket/${basketId}/shipping-cost`)
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json');
 

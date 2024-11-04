@@ -5,7 +5,7 @@ import { ShippingCostDto } from './shipping-cost.dto';
 import { getShippingCost } from '@contexts/shopping-basket/domain/queries/get-shipping-cost.query';
 
 @Controller('basket/:basketId')
-export class ShippingCostController {
+export class BasketShippingCostController {
   constructor(
     @Inject(BasketRepository)
     private readonly basketRepository: BasketRepository,

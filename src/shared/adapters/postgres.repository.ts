@@ -1,34 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import {
-  BaseRepository,
-  Database,
-  DatabaseInsertable,
-  DatabaseUpdateable,
-} from '@shared/domain/ports/base.repository';
+import { BaseRepository } from '@shared/domain/ports/base.repository';
 import { sql, type Kysely } from 'kysely';
-import { type InsertExpression } from 'kysely/dist/cjs/parser/insert-values-parser';
-import { type UpdateObjectExpression } from 'kysely/dist/cjs/parser/update-set-parser';
-import { InjectKysely } from 'nestjs-kysely';
 import { isUndefined } from 'util';
 
-export type PostgresDatabase<TDatabase extends Database> = Kysely<TDatabase>;
+// TODO improve type to have a typesafe implementation
+export type PostgresDatabase = Kysely<any>;
 
 @Injectable()
-export class PostgresRepository<TDatabase extends Database>
-  implements BaseRepository<TDatabase>
+export class PostgresRepository<TTableTuple extends { id: string }>
+  implements BaseRepository<TTableTuple>
 {
   protected readonly schema: string;
-  protected readonly databaseWithSchema: PostgresDatabase<TDatabase>;
-  protected readonly tableName: string;
+  protected readonly databaseWithSchema: PostgresDatabase;
   constructor(
     // Do not use this "database" but only the "databaseWithSchema"
-    @InjectKysely() private readonly database: PostgresDatabase<TDatabase>,
+    private readonly database: PostgresDatabase,
+    protected readonly tableName: string,
   ) {
     this.schema = process.env.DB_SCHEMA ?? 'public';
     this.databaseWithSchema = this.database.withSchema(this.schema);
   }
 
-  async getById<T extends keyof TDatabase>(id: string): Promise<T | undefined> {
+  async getById(id: string): Promise<TTableTuple | undefined> {
     const values = await this.databaseWithSchema
       .selectFrom(this.tableName)
       .selectAll()
@@ -38,10 +31,8 @@ export class PostgresRepository<TDatabase extends Database>
     return values[0] as any;
   }
 
-  async save<T extends keyof TDatabase>(
-    value: DatabaseInsertable<TDatabase>[T] | DatabaseUpdateable<TDatabase>[T],
-  ): Promise<void> {
-    const id: string = value.id!;
+  async save(value: TTableTuple): Promise<void> {
+    const id: string = value.id;
     const record = await this.getById(id);
 
     if (isUndefined(record)) {
@@ -62,35 +53,20 @@ export class PostgresRepository<TDatabase extends Database>
     )}`.execute(this.database);
   }
 
-  private async insertOne<T extends keyof TDatabase>(
-    value: DatabaseInsertable<TDatabase>[T],
-  ): Promise<void> {
-    await this.databaseWithSchema
-      .insertInto(this.tableName)
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      .values({
-        ...value,
-        metaUpdatedAt: new Date(),
-        metaCreatedAt: new Date(),
-      } as InsertExpression<TDatabase, string>)
-      .execute();
+  private async insertOne(value: TTableTuple): Promise<void> {
+    const query = this.databaseWithSchema.insertInto(this.tableName).values({
+      ...value,
+    });
+
+    await query.execute();
   }
 
-  private async update<T extends keyof TDatabase>(
-    value: DatabaseUpdateable<TDatabase>[T],
-    id: string,
-  ): Promise<void> {
-    await this.databaseWithSchema
+  private async update(value: TTableTuple, id: string): Promise<void> {
+    const query = this.databaseWithSchema
       .updateTable(this.tableName)
-      .set(
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        { ...value, metaUpdatedAt: new Date() } as UpdateObjectExpression<
-          TDatabase,
-          string extends keyof TDatabase ? keyof TDatabase & string : never,
-          string extends keyof TDatabase ? keyof TDatabase & string : never
-        >,
-      )
-      .where('id', '=', id as any)
-      .execute();
+      .set({ ...value })
+      .where('id', '=', id as any);
+
+    await query.execute();
   }
 }

@@ -32,9 +32,4 @@ export class InMemoryRepository<T extends { readonly id: string }>
     const db = this.getDatabase();
     return db.get(id) ?? undefined;
   }
-
-  async findAll(): Promise<T[]> {
-    const db = this.getDatabase();
-    return Array.from(db.values());
-  }
 }
